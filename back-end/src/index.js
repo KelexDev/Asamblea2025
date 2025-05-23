@@ -1,23 +1,37 @@
-import express from 'express' //crea servidor 
-import cors from 'cors'
-import dotenv from 'dotenv' //utilizar las env
-import {getConnection} from './config/Connection.js'
-import router from './routes/productoRoute.js'
+import express from 'express';
+import http from 'http';
+import cors from 'cors';
+import { Server as socketIo } from 'socket.io';
+import asambleaRoutes from './routes/asambleaRoute.js';
 import authRoutes from './routes/authRoute.js';
 
+const app = express();
+const server = http.createServer(app);
+const io = new socketIo(server, {
+    cors: {
+        origin: "*", // Permite cualquier origen en desarrollo
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization"]
+    }
+});
 
+// Habilitar CORS para todas las rutas HTTP
+app.use(cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
-
-const app = express()
-
-dotenv.config()
-
-app.use(cors())
-app.use(express.json())
-app.use(router) //metodo de listar
+// Middleware y rutas
+app.use(express.json());
 app.use('/api/auth', authRoutes);
+app.use('/api/asamblea', asambleaRoutes);
 
-app.listen(process.env.PORT, ()=>{
-    console.log(`Conectados al puerto: ${process.env.PORT}`)
-    getConnection
-})
+// Compartir io con las rutas
+app.set('io', io);
+
+// Iniciar servidor
+const PORT = process.env.PORT || 3001;
+server.listen(PORT, () => {
+    console.log(`Servidor corriendo en puerto ${PORT}`);
+});

@@ -29,6 +29,7 @@ function App() {
             <Route path='/Nosotros' element={<Nosotros />} />
             <Route path='/Administrador' element={<Administrador />} />
             <Route path='/Participante' element={<Participante />} />
+
           </Routes>
         </main>
 
